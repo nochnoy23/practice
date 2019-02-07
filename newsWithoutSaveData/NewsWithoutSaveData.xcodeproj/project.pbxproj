@@ -14,6 +14,7 @@
 		8D23B258220C2F1B00F1ECC0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8D23B256220C2F1B00F1ECC0 /* LaunchScreen.storyboard */; };
 		8D23B263220C2F1B00F1ECC0 /* NewsWithoutSaveDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D23B262220C2F1B00F1ECC0 /* NewsWithoutSaveDataTests.swift */; };
 		8D23B26E220C2F1B00F1ECC0 /* NewsWithoutSaveDataUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D23B26D220C2F1B00F1ECC0 /* NewsWithoutSaveDataUITests.swift */; };
+		8D23B27C220C2FF600F1ECC0 /* ViewAdd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D23B27B220C2FF600F1ECC0 /* ViewAdd.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		8D23B269220C2F1B00F1ECC0 /* NewsWithoutSaveDataUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NewsWithoutSaveDataUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D23B26D220C2F1B00F1ECC0 /* NewsWithoutSaveDataUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsWithoutSaveDataUITests.swift; sourceTree = "<group>"; };
 		8D23B26F220C2F1B00F1ECC0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8D23B27B220C2FF600F1ECC0 /* ViewAdd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewAdd.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 		8D23B241220C2F1A00F1ECC0 = {
 			isa = PBXGroup;
 			children = (
+				8D23B27B220C2FF600F1ECC0 /* ViewAdd.swift */,
 				8D23B24C220C2F1A00F1ECC0 /* NewsWithoutSaveData */,
 				8D23B261220C2F1B00F1ECC0 /* NewsWithoutSaveDataTests */,
 				8D23B26C220C2F1B00F1ECC0 /* NewsWithoutSaveDataUITests */,
@@ -257,6 +260,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D23B250220C2F1A00F1ECC0 /* ViewController.swift in Sources */,
+				8D23B27C220C2FF600F1ECC0 /* ViewAdd.swift in Sources */,
 				8D23B24E220C2F1A00F1ECC0 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -433,6 +437,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7QVFB52A5D;
 				INFOPLIST_FILE = NewsWithoutSaveData/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -450,6 +455,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7QVFB52A5D;
 				INFOPLIST_FILE = NewsWithoutSaveData/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
