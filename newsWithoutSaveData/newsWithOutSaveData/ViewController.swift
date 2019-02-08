@@ -1,5 +1,11 @@
 //: A UIKit based Playground for presenting user interface
 
+//здесь должно в дальнейшем происходить чтение языка
+
+  // здесь необходимо добавить локализацию для отображения информации о дате выхода новости
+  //на вход необходимо отправить массив слов (по умолчанию английский язык)
+
+
 import UIKit
 
 import Foundation
@@ -9,82 +15,142 @@ class ViewController: UIViewController, UITextViewDelegate, UITableViewDelegate 
   override func loadView() {
     super.loadView()
     
-    connectAndSaveNewsData(callback: updateV2)
+    connectAndSaveNewsData(callback: updateString)
     self.tableView.dataSource = self
     self.tableView.delegate = self
+
     tableView.tableFooterView = UIView()
     self.edgesForExtendedLayout = []
-    self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+    self.tableView.register(CellNews.self, forCellReuseIdentifier: "cell")
     self.tableView.backgroundColor = UIColor(white: 242 / 255.0, alpha: 1.0)
-    self.view.add(subview: tableView, with: [.leading, .trailing, .bottom, .top])
+//    self.view.add(subview: tableView, with: [.leading, .trailing, .bottom, .top])
     self.view.backgroundColor = UIColor(white: 242 / 255.0, alpha: 1.0)
-    
+    self.tableView.tag = 1488
     refresher.addTarget(self, action: #selector(reqestData), for: .valueChanged)
     self.tableView.refreshControl = self.refresher
     
   }
   
-  private func updateUI(data: [SldNewsArticle]) {
-    SldNewsArticle.updateLastReadDate(of: Date())
-    var tempNewsInfo: [NewsInformation] = []
-    let len = "en" //здесь должно в дальнейшем происходить чтение языка
-    for item in data {
-      // здесь необходимо добавить локализацию для отображения информации о дате выхода новости
-      //на вход необходимо отправить массив слов (по умолчанию английский язык)
-      guard let message = item.message[len] else { continue }
-      let oneNews = makeNews(date: item.date.isString(with: [""]), isRead: item.isRead, message: message)
-      tempNewsInfo.append(oneNews)
-    }
-    self.tableView.reloadData()
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    tableView.rowHeight = UITableView.automaticDimension
+    tableView.estimatedRowHeight = 30
+    
+//    let heightStatusBar = UIApplication.shared.statusBarFrame.height
+//    let inset = UIEdgeInsets(top: heightStatusBar, left: 0, bottom: 0, right: 0)
+//    tableView.contentInset = inset
+//    tableView.scrollIndicatorInsets = inset
   }
   
-  private func updateV2(data: [SldNewsArticle]) {
+  private var newsStruct: [SldNewsArticle] = []
+  
+  private func updateString(data: String) {
     
+    let dataToNews = parseData(data: data)
+    self.view.removeAllSubviews()
+    newsStruct = dataToNews
+    self.view.add(subview: tableView, with: [.leading, .trailing, .bottom, .top])
+    tableView.reloadData()
     SldNewsArticle.updateLastReadDate(of: Date())
-    
-    self.tableView.beginUpdates()
-    
-    
-//    for (index, _ ) in self.newsInfo.enumerated() {
-//      tableView.deleteRows(at: [IndexPath(row: 0, section: index)], with: .automatic)
-//    }
-    
-    self.newsInfo = []
-    let len = "en" //здесь должно в дальнейшем происходить чтение языка
-    for (index, item) in data.enumerated() {
-      // здесь необходимо добавить локализацию для отображения информации о дате выхода новости
-      //на вход необходимо отправить массив слов (по умолчанию английский язык)
-      guard let message = item.message[len] else { continue }
-      let oneNews = makeNews(date: item.date.isString(with: [""]), isRead: item.isRead, message: message)
-      self.newsInfo.append(oneNews)
-      tableView.insertRows(at: [IndexPath(row: 0, section: index)], with: .automatic)
+  }
+
+  
+  @objc func reqestData() {
+    let deadLine = DispatchTime.now() + .milliseconds(500)
+    DispatchQueue.main.asyncAfter(deadline: deadLine) {
+      connectAndSaveNewsData(callback: self.updateString)
+      self.refresher.endRefreshing()
     }
-    self.tableView.endUpdates()
   }
   
-  private func makeNews(date: String, isRead: Bool, message: String) -> NewsInformation {
-    let view = UIView(frame: .zero)
+  private let tableView = UITableView(frame: .zero, style: .plain)
+  private let refresher = UIRefreshControl()
+ 
+}
+
+
+
+extension ViewController: UITableViewDataSource {
+  public func numberOfSections(in _: UITableView) -> Int {
+    return self.newsStruct.count
+  }
+  
+  public func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return 1
+  }
+  
+  
+  public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     
-    let textView = UITextView(frame: .zero)
+    let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CellNews
+    cell.createCellNews(message: newsStruct[indexPath.section].message["en"]!, isRead: newsStruct[indexPath.section].isRead)
+    return cell
+  }
+  
+  func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    let view = CustomSection(date: newsStruct[section].date, isRead: newsStruct[section].isRead)
+    return view
+  }
+  
+  func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    return 30
+  }
+  
+  func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    return UITableView.automaticDimension
+  }
+//  func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//    print(newsInfo[indexPath.section].message.bounds.size.height)
+//
+//    return 100
+//  }
+}
+
+class CellNews: UITableViewCell {
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    
     textView.isEditable = false
     textView.isSelectable = true
     textView.isScrollEnabled = false
     textView.dataDetectorTypes = .link
     textView.isUserInteractionEnabled = true
-    let htmlData = NSString(string: message).data(using: String.Encoding.unicode.rawValue)
-    let options = [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.html]
-    textView.attributedText = try! NSAttributedString(data: htmlData!, options: options, documentAttributes: nil)
     textView.dataDetectorTypes = .link
     
     view.add(subview: textView, with: UIEdgeInsets(top: 0, left: 3, bottom: 0, right: 0))
+    self.contentView.add(subview: view, with: UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20))
+    self.backgroundColor = UIColor(white: 242 / 255.0, alpha: 1.0)
+    self.selectionStyle = .none
+  }
+  
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  public func createCellNews(message: String, isRead: Bool) {
+    let htmlData = NSString(string: message).data(using: String.Encoding.unicode.rawValue)
+    let options = [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.html]
+    textView.attributedText = try! NSAttributedString(data: htmlData!, options: options, documentAttributes: nil)
     if isRead {
       view.backgroundColor = UIColor(white: 242 / 255.0, alpha: 1.0)
     } else {
       view.backgroundColor = UIColor(red: 149 / 255, green: 202 / 255, blue: 1, alpha: 1)
     }
+  }
+  
+  override func awakeFromNib() {
+    super.awakeFromNib()
+    textView.adjustsFontForContentSizeCategory = true
+  }
+  public var textView = UITextView()
+  public var view = UIView()
+}
+
+class CustomSection: UIView {
+  init(date: Date, isRead: Bool) {
+    super.init(frame: .zero)
     
-    let textField = UITextField()
-    textField.text = date
+    textField.text = date.isString(with: [""])
     textField.isEnabled = false
     textField.isSelected = false
     textField.textAlignment = .right
@@ -97,67 +163,19 @@ class ViewController: UIViewController, UITextViewDelegate, UITableViewDelegate 
     
     textField.contentVerticalAlignment = .bottom
     textField.backgroundColor = UIColor(white: 242 / 255.0, alpha: 1.0)
-    return NewsInformation(date: textField, message: view)
+    self.add(subview: textField, with: UIEdgeInsets(top: 0, left: 20, bottom: 5, right: 20))
   }
+  private let textField = UITextField(frame: .zero)
   
-  @objc func reqestData() {
-    let deadLine = DispatchTime.now() + .milliseconds(500)
-    DispatchQueue.main.asyncAfter(deadline: deadLine) {
-      connectAndSaveNewsData(callback: self.updateV2)
-      self.refresher.endRefreshing()
-    }
-  }
-  
-  private let tableView = UITableView(frame: .zero, style: .plain)
-  private let refresher = UIRefreshControl()
-  private var newsInfo: [NewsInformation] = []
-  
-  fileprivate struct NewsInformation {
-    let date: UITextField
-    let message: UIView
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
 }
 
 
 
-extension ViewController: UITableViewDataSource {
-  public func numberOfSections(in _: UITableView) -> Int {
-    return self.newsInfo.count
-  }
-  
-  public func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return 1
-  }
-  
-  
-  public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    
-    let cell = tableView.dequeueReusableCell(withIdentifier: "cell") ?? UITableViewCell()
-    print("indexPath.section = \(indexPath.section) newInfo.count = \(newsInfo.count)")
-//    print("")
-    cell.contentView.add(subview: newsInfo[indexPath.section].message, with: UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20))
-    cell.backgroundColor = UIColor(white: 242 / 255.0, alpha: 1.0)
-    cell.selectionStyle = .none
-    
-    return cell
-  }
-  
-  func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-    let view = UIView()
-    view.add(subview: newsInfo[section].date, with: UIEdgeInsets(top: 0, left: 20, bottom: 5, right: 20))
-    return view
-  }
-  
-  func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-    return 30
-  }
-  
-//  func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//    print(newsInfo[indexPath.section].message.bounds.size.height)
-//
-//    return 100
-//  }
-}
+
+
 
 extension String {
   var htmlToAttributedString: NSAttributedString? {
@@ -210,7 +228,7 @@ struct SldNewsArticle {
   }
 }
 
-fileprivate func connectAndSaveNewsData(callback: @escaping ([SldNewsArticle]) -> Void) {
+fileprivate func connectAndSaveNewsData(callback: @escaping (String) -> Void) {
 //  guard let url = URL(string: "http://ads.penreader.com/?protocol=2&catalog_id=27") else { return } //&catalog_id=27
   guard let url = URL(string: "http://ads.penreader.com/?protocol=2&catalog_id=27&from=1970-01-01&devel=1&lang=ru") else { return }
   let task = URLSession.shared.dataTask(with: url) { data, response, error in
@@ -223,10 +241,11 @@ fileprivate func connectAndSaveNewsData(callback: @escaping ([SldNewsArticle]) -
       case 200:
         guard let data = data else { return }
         let dataString = String(data: data, encoding: .utf8)!
-        let dataToNews = parseData(data: dataString)
-        print("first array count =  \(dataToNews.count)")
+//        let dataToNews = parseData(data: dataString)
+//        print("first array count =  \(dataToNews.count)")
         DispatchQueue.main.async {
-          callback(dataToNews)
+          callback(dataString)
+//          callback(dataToNews)
         }
       case 300:
         print("The request does not match the protocol")
